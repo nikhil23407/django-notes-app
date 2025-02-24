@@ -1,20 +1,20 @@
-FROM python:3.9
+# Build stage
+FROM python:3.9 as builder
 
 WORKDIR /app/backend
 
-COPY requirements.txt /app/backend
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y gcc default-libmysqlclient-dev pkg-config \
-    && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --user -r requirements.txt
 
+# Runtime stage
+FROM python:3.9-slim
 
-# Install app dependencies
-RUN pip install mysqlclient
-RUN pip install --no-cache-dir -r requirements.txt
+WORKDIR /app/backend
 
-COPY . /app/backend
+COPY --from=builder /root/.local /root/.local
+COPY . .
+
+ENV PATH=/root/.local/bin:$PATH
 
 EXPOSE 8000
-#RUN python manage.py migrate
-#RUN python manage.py makemigrations
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
