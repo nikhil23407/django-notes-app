@@ -17,4 +17,4 @@ COPY . .
 ENV PATH=/root/.local/bin:$PATH
 
 EXPOSE 8000
-CMD ["python", "script.py"]
+CMD ["python", "manage.py", "script.py", "runserver", "0.0.0.0:8000"]
